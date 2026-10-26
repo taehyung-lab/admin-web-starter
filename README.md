@@ -148,11 +148,10 @@ mock 통과나 HTTP 200만으로 서버 계약을 확인했다고 보지 않는�
 gh release download v<버전> --repo taehyung-lab/web-kit --pattern 'boosterlab-web-kit-<버전>.tgz' --dir vendor
 pnpm add @boosterlab/web-kit@file:vendor/boosterlab-web-kit-<버전>.tgz
 git rm vendor/boosterlab-web-kit-<이전 버전>.tgz
-for s in node_modules/@boosterlab/web-kit/skills/*/; do ln -sfn "$(python3 -c 'import os,sys;print(os.path.relpath(sys.argv[1],".agents/skills"))' "$s")" ".agents/skills/$(basename "$s")"; done
 pnpm check
 ```
 
-package.json·lockfile·tarball을 한 commit에 넣는다. 스킬 링크는 `node_modules`를 가리키므로 `pnpm install` 전에는 열리지 않는다.
+package.json·lockfile·tarball을 한 commit에 넣는다. 스킬 연결과 기존 경로 확인은 [web-kit README의 스킬 연결](https://github.com/taehyung-lab/web-kit#스킬)을 따른다. 스킬 링크는 `node_modules`를 가리키므로 `pnpm install` 전에는 열리지 않는다.
 
 **agent-workflow-kit** — 확인한 버전의 로컬 키트 checkout에서:
 
