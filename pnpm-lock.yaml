@@ -12,8 +12,8 @@ importers:
         specifier: 1.7.0
         version: 1.7.0(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@boosterlab/web-kit':
-        specifier: file:vendor/boosterlab-web-kit-1.0.3.tgz
-        version: file:vendor/boosterlab-web-kit-1.0.3.tgz(@tanstack/react-form@1.33.5(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(@tanstack/react-query@5.102.6(react@19.2.8))(@tanstack/react-router@1.170.32(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(axios@1.20.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        specifier: file:vendor/boosterlab-web-kit-1.0.5.tgz
+        version: file:vendor/boosterlab-web-kit-1.0.5.tgz(@tanstack/react-form@1.33.5(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(@tanstack/react-query@5.102.6(react@19.2.8))(@tanstack/react-router@1.170.32(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(axios@1.20.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       '@tanstack/react-form':
         specifier: 1.33.5
         version: 1.33.5(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -220,9 +220,9 @@ packages:
       '@types/react':
         optional: true
 
-  '@boosterlab/web-kit@file:vendor/boosterlab-web-kit-1.0.3.tgz':
-    resolution: {integrity: sha512-3NnuahR45GlD7CrQuVA+/6dKkac8/I+6QvV4XxILy+aBMQW6IwKL5oF+gRZNj0hXVjvGWaUZrFkrp/z2AoLfaQ==, tarball: file:vendor/boosterlab-web-kit-1.0.3.tgz}
-    version: 1.0.3
+  '@boosterlab/web-kit@file:vendor/boosterlab-web-kit-1.0.5.tgz':
+    resolution: {integrity: sha512-Tc3yiFmU1E7iFPT70c5hZk7rpOxSXS882rH2+ZMfw96XkEPdgVMCybYMT9hBQF3lwrdB3ppOncikbBHmINZzHA==, tarball: file:vendor/boosterlab-web-kit-1.0.5.tgz}
+    version: 1.0.5
     peerDependencies:
       '@tanstack/react-form': 1.33.5
       '@tanstack/react-query': 5.102.6
@@ -2717,7 +2717,7 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.18
 
-  '@boosterlab/web-kit@file:vendor/boosterlab-web-kit-1.0.3.tgz(@tanstack/react-form@1.33.5(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(@tanstack/react-query@5.102.6(react@19.2.8))(@tanstack/react-router@1.170.32(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(axios@1.20.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
+  '@boosterlab/web-kit@file:vendor/boosterlab-web-kit-1.0.5.tgz(@tanstack/react-form@1.33.5(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(@tanstack/react-query@5.102.6(react@19.2.8))(@tanstack/react-router@1.170.32(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(axios@1.20.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
     dependencies:
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
