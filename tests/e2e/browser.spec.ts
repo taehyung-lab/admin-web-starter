@@ -1,4 +1,4 @@
-// 파일 책임: jsdom으로 볼 수 없는 키트 보장을 실제 브라우저에서 관찰한다 — 여러 탭의 세션, 진입 주소 정규화와 요청 순서, 결과가 있을 때의 재조회 실패.
+// 파일 책임: jsdom으로 볼 수 없는 키트 보장을 실제 브라우저에서 관찰한다 — 여러 탭의 세션, 진입 주소 정규화와 요청 순서, 결과가 있을 때의 재조회 실패, 저장 직후 이동과 이탈 질문.
 import { expect, test, type Page, type Request } from '@playwright/test';
 
 /** mock 계정으로 로그인하고 상품 목록이 보일 때까지 기다린다. */
@@ -73,4 +73,50 @@ test('a failed background refresh keeps the rows and offers a retry', async ({ p
   await expect(page.getByText('최신 내용을 불러오지 못했습니다.', { exact: false })).toBeVisible();
   await expect(page.getByRole('cell', { name: 'Mouse Pad' })).toBeVisible();
   await expect(page.getByRole('button', { name: '다시 시도' })).toBeVisible();
+});
+
+/** 등록 폼을 유효한 값으로 채운다. */
+async function fillNewProduct(page: Page) {
+  await page.goto('/products/new');
+  await page.getByLabel('상품명').fill('Fresh Item');
+  await page.getByLabel('상품 코드').fill('FRESH-1');
+  await expect(page.getByRole('option', { name: 'Stationery' })).toBeAttached();
+  await page.getByLabel('분류').selectOption({ label: 'Stationery' });
+}
+
+test('saving a new product moves to its detail without an unsaved-changes question', async ({ page }) => {
+  await signIn(page);
+  await fillNewProduct(page);
+  await page.getByRole('button', { name: '등록', exact: true }).click();
+  await expect(page).toHaveURL(/\/products\/[^/]+$/);
+  await expect(page.getByRole('alertdialog')).toHaveCount(0);
+});
+
+test('typing while the save is in flight is protected when the page moves on', async ({ page }) => {
+  await signIn(page);
+  await fillNewProduct(page);
+  await page.getByRole('button', { name: '등록', exact: true }).click();
+  await page.getByLabel('상품명').fill('Typed during save');
+  await expect(page.getByRole('alertdialog')).toContainText('저장하지 않은 변경이 있습니다');
+});
+
+test('leaving with unsaved input asks first and staying keeps the input', async ({ page }) => {
+  await signIn(page);
+  await page.goto('/products/new');
+  await page.getByLabel('상품명').fill('Kept name');
+  await page.getByRole('button', { name: '취소', exact: true }).click();
+  await page.getByRole('alertdialog').getByRole('button', { name: '계속 편집' }).click();
+  await expect(page.getByLabel('상품명')).toHaveValue('Kept name');
+});
+
+test('saving an edit moves to the detail without an unsaved-changes question', async ({ page }) => {
+  await signIn(page);
+  await page.getByRole('cell', { name: 'Mouse Pad' }).click();
+  await expect(page).toHaveURL(/\/products\/[^/]+$/);
+  await page.goto(`${new URL(page.url()).pathname}/edit`);
+  await page.getByLabel('상품명').fill('Mouse Pad 2');
+  await page.getByRole('button', { name: '저장', exact: true }).click();
+  await page.getByRole('alertdialog').getByRole('button', { name: '저장', exact: true }).click();
+  await expect(page).toHaveURL(/\/products\/[^/]+$/);
+  await expect(page.getByRole('alertdialog')).toHaveCount(0);
 });

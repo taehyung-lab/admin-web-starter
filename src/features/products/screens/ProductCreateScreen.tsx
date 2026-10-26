@@ -24,7 +24,7 @@ export function ProductCreateScreen({ onCreated, onCancel }: { readonly onCreate
     <div className="flex flex-col gap-5">
       <h1 className="text-xl font-semibold text-slate-900">{t('products.form.createTitle')}</h1>
       <ProductForm saveForm={saveForm} submitLabel={t('products.form.submitCreate')} onCancel={onCancel} />
-      <LeaveGuard when={saveForm.isDirty && !saveForm.isSaving} />
+      <LeaveGuard when={saveForm.isDirty} />
     </div>
   );
 }

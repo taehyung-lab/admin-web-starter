@@ -81,7 +81,7 @@ function ProductEditForm({ product, onSaved, onCancel }: { readonly product: Pro
           </>
         )}
       </ConfirmDialog>
-      <LeaveGuard when={saveForm.isDirty && !saveForm.isSaving && stage.kind === 'idle'} />
+      <LeaveGuard when={saveForm.isDirty && stage.kind !== 'confirming'} />
     </>
   );
 }

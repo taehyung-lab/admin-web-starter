@@ -10,8 +10,7 @@ function ProductCreateRoute() {
   const navigate = Route.useNavigate();
   return (
     <ProductCreateScreen
-      // 저장 직후 이동은 이탈 질문을 거치지 않는다.
-      onCreated={(productId) => void navigate({ to: '/products/$productId', params: { productId }, ignoreBlocker: true })}
+      onCreated={(productId) => void navigate({ to: '/products/$productId', params: { productId } })}
       onCancel={() => void navigate({ to: '/products' })}
     />
   );

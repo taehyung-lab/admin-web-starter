@@ -13,13 +13,12 @@ export const Route = createFileRoute('/_app/products/$productId/edit')({
 function ProductEditRoute() {
   const { productId } = Route.useParams();
   const navigate = Route.useNavigate();
-  const toDetail = (ignoreBlocker: boolean) => void navigate({ to: '/products/$productId', params: { productId }, ignoreBlocker });
+  const toDetail = () => void navigate({ to: '/products/$productId', params: { productId } });
   return (
     <ProductEditScreen
       productId={productId}
-      // 저장 직후 이동은 이탈 질문을 거치지 않는다.
-      onSaved={() => toDetail(true)}
-      onCancel={() => toDetail(false)}
+      onSaved={toDetail}
+      onCancel={toDetail}
       onBack={() => void navigate({ to: '/products' })}
     />
   );
