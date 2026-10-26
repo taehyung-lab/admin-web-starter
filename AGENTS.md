@@ -54,23 +54,7 @@ lockfile에 없는 의존성 추가·lockfile 변경·원격 스크립트 실행
 
 저장소가 관리하는 근거의 위치와 한 줄 설명만 둔다. 작업 상태는 작업 기록이, 역할 선택은 description이 맡아 관리한다. 이 절과 그 아래 저장소별 절은 프로젝트가 관리하며, 위 키트 영역은 고치지 않는다.
 
-- 제품 원문·사용자 결정·결정권자: `docs/product/` — 화면별 제품 정책(기본값·문구·권한·업무 규칙) 문서 자리, 지금은 비어 있음. 결정권자: 미확인
-- 코드 진입·상태 관리 위치·외부 계약:
-  - `src/app/web-kit.ts` — web-kit 연결의 유일한 진입(세션 저장소·재발급·공개 경로·운영 헤더·QueryClient·결과 코드 표). orval mutator `apiRequest`도 여기다.
-  - `src/app/` — provider 조립·router·인증(세션 시작/종료 → 이동)·오류 경계·i18n.
-  - `src/features/<도메인>/` — `api/`(queryOptions·mutation·DTO 변환), `model/`(검색 선언·폼 schema·요청 변환), `screens/`(화면).
-  - `src/shared/ui/` — 프로젝트 UI adapter(Base UI + Tailwind). 도메인을 모른다.
-  - `src/routes/` — 파일 route(`validateSearch`·`beforeLoad`·loader 미리 받기).
-  - `openapi/` — API 명세. `pnpm api:generate`로 `src/api/generated`(commit 대상)를 만든다. 지금 명세는 예시이고 실제 서버 명세는 미확인.
-  - `src/mocks/` — 명세를 흉내 내는 msw handler(테스트·`pnpm dev:mock`).
-- 실행·검사 명령·관찰 환경·시험 데이터: `package.json` scripts(`check` = typecheck + lint + test + build), CI `.github/workflows/check.yml`, 환경 변수 `.env.example`, mock 시험 데이터 `src/mocks/db.ts`. 실서버 관찰 환경: 미확인
+- 제품 원문·사용자 결정·결정권자: `docs/product/` — 화면별 제품 정책(기본값·문구·권한·업무 규칙) 문서 자리, 지금은 비어 있음. 예시 기능(상품)의 값은 스타터의 예시이며 제품 결정이 아니다. 결정권자: 미확인
+- 코드 진입·상태 관리 위치·외부 계약: 구조는 `README.md` 「구조」. 키트 연결의 유일한 진입은 `src/app/web-kit.ts`(세션 저장소·재발급·공개 경로·운영 헤더·QueryClient·결과 코드 표, orval mutator `apiRequest`). API 명세는 `openapi/`이고 `pnpm api:generate`로 `src/api/generated`(commit 대상)를 만든다. 지금 명세는 예시이고 실제 서버 명세는 미확인.
+- 실행·검사 명령·관찰 환경·시험 데이터: `package.json` scripts(`check` = typecheck + lint + test + build, 브라우저 검사 `test:e2e`), CI `.github/workflows/check.yml`, 환경 변수 `.env.example`, mock 시험 데이터 `src/mocks/db.ts`. 실서버 관찰 환경: 미확인
 - 권한·보호 대상·작업 한도·질문 통로: git 원격 미확인. 그 밖은 미확인
-
-## 화면 작업 근거
-
-단계 선택은 위 「필요한 단계만」을 따른다. 화면 변경에 필요한 근거와 검사는 다음 위치에서 찾는다.
-
-- 공통 동작: 바뀌는 책임의 web-kit 역할 스킬(`web-kit-list`·`web-kit-record`·`web-kit-form`·`web-kit-http`).
-- 제품 정책: 현재 요청과 `docs/product/`의 해당 화면 정책. 이 근거로 확정할 수 없는 결정만 묻는다.
-- 화면 연결: `src/features/products/`의 제품 값 선언과 `src/shared/ui/` adapter.
-- 검증: 키트 adapter 검사(`/testing`)와 실제 화면의 URL·요청·focus 관찰. 브라우저에서만 확인할 보장은 `tests/e2e/`.
