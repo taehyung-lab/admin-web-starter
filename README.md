@@ -21,7 +21,7 @@
 
 두 키트:
 
-- **[web-kit](https://github.com/taehyung-lab/web-kit)** (`@boosterlab/web-kit` 1.0.2): 실패 12종·세션 수명·요청 처리·QueryClient 규칙·URL 검색·목록·폼·단건 상태·adapter 검사. 동작 코드와 사용 스킬을 같은 버전으로 준다. `vendor/`의 release tarball로 설치한다.
+- **[web-kit](https://github.com/taehyung-lab/web-kit)** (`@boosterlab/web-kit` 1.0.2): 실패 12종·세션 수명·요청 처리·QueryClient 규칙·URL 검색·목록·폼·단건 상태·adapter 검사. 동작 코드와 사용 스킬을 같은 버전으로 준다. `vendor/`의 release tarball로 설치한다(아래 「두 키트가 프로젝트에 들어오는 방식」).
 - **[agent-workflow-kit](https://github.com/taehyung-lab/agent-workflow-kit)**: 요구 → 조건 → 검사로 잇는 에이전트 작업 기준. `AGENTS.md`의 표시 영역, `CLAUDE.md`, `.agents/skills/wf-*`를 설치한다.
 
 ## 빠른 시작
@@ -42,6 +42,37 @@ pnpm dev:mock      # msw mock API로 실행. 계정 admin / password
 | `pnpm test:e2e` | 실제 브라우저(chromium, mock 모드) 검사. 처음 한 번 `pnpm exec playwright install chromium`. CI는 `check` 뒤에 돌린다 |
 
 mock 모드에서는 access 토큰이 2분 뒤 만료되고, 새로고침하면 mock 서버 상태가 초기화된다. 그래서 401 → 재발급 → 재전송 흐름을 바로 볼 수 있다.
+
+## 두 키트가 프로젝트에 들어오는 방식
+
+이 저장소는 두 키트를 **프로젝트 안에 설치해서** 쓴다. 키트는 들어오는 방식이 서로 다르다.
+
+| | agent-workflow-kit | web-kit |
+|---|---|---|
+| 맡는 일 | 에이전트가 일하는 방법: 요구 → 조건 → 구현 → 검증 → 교정 | 이 스택의 공통 동작 코드와 그 사용 기준 |
+| 이 저장소에서 보이는 것 | `AGENTS.md`의 키트 표시 영역, `CLAUDE.md`, `.agents/skills/wf-*` | `vendor/boosterlab-web-kit-*.tgz`, `package.json`의 `file:` 의존, `.agents/skills/web-kit-*` |
+| 들어오는 방법 | 키트의 `install.sh`가 **파일로 복사**한다 | release tarball을 `vendor/`에 두고 **패키지로 설치**한다. 스킬은 설치된 패키지 안의 것을 링크한다 |
+| 버전 고정 | `.agents/agent-workflow-kit.version`의 커밋 | `package.json`·lockfile·tarball(버전 번호 하나 = 내용 하나) |
+| 갱신 | `install.sh --update` | 새 tarball로 교체하고 `pnpm install` |
+| 고치는 곳 | 이 저장소에서 키트 소유 파일을 고치지 않는다. 키트 저장소를 고치고 새 버전을 받는다 | 같다 |
+
+복사로 들어오는 쪽(agent-workflow-kit)은 문서라서 파일이 프로젝트에 있어야 에이전트가 바로 읽는다. 패키지로 들어오는 쪽(web-kit)은 코드라서 버전 관리를 패키지 매니저에 맡기고, 사용 기준(스킬)은 같은 패키지에서 같은 버전으로 가져온다. 그래서 코드와 사용 기준이 서로 다른 버전이 되지 않는다.
+
+**어떻게 시작하나**
+
+- **새 프로젝트:** 이 저장소의 GitHub "Use this template"로 시작한다. 두 키트가 이미 설치돼 있다. `pnpm install` 뒤 `pnpm check`로 확인하고, `AGENTS.md`의 프로젝트 지도를 이 저장소 사실로 채운다(모르는 것은 `미확인`).
+- **기존 프로젝트에 넣기:** 두 키트를 각자 방식으로 설치한다. 명령은 키트 README가 정본이다.
+  1. [agent-workflow-kit README](https://github.com/taehyung-lab/agent-workflow-kit#readme)의 설치. 이미 `AGENTS.md`가 있으면 설치기가 아무것도 쓰지 않고 멈춘다. 병합은 키트 README의 안내를 따른다.
+  2. [web-kit README](https://github.com/taehyung-lab/web-kit#readme)의 설치와 스킬 연결.
+  3. 두 키트가 요구하는 연결(세션 저장 위치, 재발급 호출, 결과 코드 표)을 앱의 한 곳에 둔다. 이 저장소에서는 `src/app/web-kit.ts`가 그 자리다.
+
+**에이전트는 이것을 어떻게 읽나**
+
+세션이 열리면 `AGENTS.md`(키트 영역 + 프로젝트 지도)를 읽고, 바뀌는 책임에 맞는 스킬을 스킬 설명(description)으로 고른다. 요구를 정하고 검증하는 방법은 `wf-*`가, 목록·폼·단건·요청의 공통 동작은 `web-kit-*`가 알려 준다. 이 저장소의 제품 정책과 화면 구성은 프로젝트 지도와 `docs/product/`가 알려 준다. Claude Code와 Codex 모두 새 세션에서 `wf-*`와 `web-kit-*`를 찾는 것을 확인했다.
+
+**실패가 나면 어디를 고치나**
+
+원인을 가진 곳을 고친다. 상품 정책·서버 연결·화면은 이 저장소를, 모든 소비자에게 같은 공통 동작은 web-kit을, 작업 방법은 agent-workflow-kit을 고친다. 키트를 고치면 새 버전으로 내고, 이 저장소는 그 버전으로 갱신한 뒤 자기 `pnpm check`를 통과시킨다. 자동으로 모든 프로젝트가 바뀌지는 않는다.
 
 ## 구조
 
