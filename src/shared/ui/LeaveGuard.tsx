@@ -3,7 +3,7 @@ import { useBlocker } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 import { ConfirmDialog } from './ConfirmDialog';
 
-/** when이 참인 동안 route 이동과 새로고침을 막고 확인을 받는다. 저장 뒤 이동은 ignoreBlocker로 지나간다. */
+/** when이 참인 동안 route 이동과 새로고침을 막고 확인을 받는다. 저장이 끝나면 기준선이 갱신돼 dirty가 아니므로 저장 직후 이동은 막히지 않는다. */
 export function LeaveGuard({ when }: { readonly when: boolean }) {
   const { t } = useTranslation();
   const blocker = useBlocker({ shouldBlockFn: () => when, enableBeforeUnload: () => when, withResolver: true });

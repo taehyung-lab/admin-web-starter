@@ -73,6 +73,16 @@ function ProductDetail({ product, onEdit }: { readonly product: Product; readonl
         {item(t('products.fields.category'), categoryName)}
         {item(t('products.fields.price'), formatPrice(product.price, i18n.language))}
         {item(t('products.fields.stock'), product.stock.toLocaleString(i18n.language))}
+        {item(
+          t('products.fields.options'),
+          <ul>
+            {product.options.map((option, index) => (
+              <li key={index}>
+                {option.name} (+{formatPrice(option.extraPrice, i18n.language)})
+              </li>
+            ))}
+          </ul>,
+        )}
         {item(t('products.fields.description'), product.description === '' ? t('common.empty') : <span className="whitespace-pre-wrap">{product.description}</span>)}
         {item(t('products.fields.createdAt'), formatDate(product.createdAt, i18n.language))}
         {item(t('products.fields.updatedAt'), formatDate(product.updatedAt, i18n.language))}

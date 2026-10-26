@@ -5,6 +5,7 @@
  * 스타터의 예시 계약. 실제 서버 명세로 교체한다. 모든 응답은 Spring 봉투 { header: { resultCode, resultMessage }, data }이며 resultCode 200만 성공이다.
  * OpenAPI spec version: 0.1.0
  */
+import type { ProductOption } from './productOption';
 import type { ProductStatus } from './productStatus';
 
 export interface ProductUpsertRequest {
@@ -29,4 +30,9 @@ export interface ProductUpsertRequest {
      */
   description?: string | null;
   categoryId: string;
+  /**
+     * @minItems 1
+     * @maxItems 5
+     */
+  options: ProductOption[];
 }

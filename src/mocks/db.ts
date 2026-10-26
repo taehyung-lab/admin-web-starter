@@ -31,6 +31,7 @@ function seed(): Product[] {
       price: 3_000 + ((index * 1_700) % 40_000),
       stock: (index * 7) % 60,
       description: index % 3 === 0 ? null : `${name} for everyday use.`,
+      options: [{ name: 'Default', extraPrice: 0 }],
       createdAt: created,
       updatedAt: created,
     };

@@ -19,7 +19,7 @@ function toSummary(dto: ProductSummaryDto): ProductSummary {
 }
 
 function toProduct(dto: ProductDto): Product {
-  return { ...toSummary(dto), stock: dto.stock, description: dto.description ?? '', updatedAt: dto.updatedAt };
+  return { ...toSummary(dto), stock: dto.stock, options: dto.options, description: dto.description ?? '', updatedAt: dto.updatedAt };
 }
 
 /** 목록 조회. 상태 배열은 서버 계약대로 반복 키(status=A&status=B)로 보낸다. */

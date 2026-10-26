@@ -20,6 +20,7 @@ export * from './fieldErrorEnvelope';
 export * from './listProductsParams';
 export * from './product';
 export * from './productEnvelope';
+export * from './productOption';
 export * from './productPage';
 export * from './productPageEnvelope';
 export * from './productStatus';
