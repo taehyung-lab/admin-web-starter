@@ -21,7 +21,7 @@
 
 두 키트:
 
-- **[web-kit](https://github.com/taehyung-lab/web-kit)** (`@boosterlab/web-kit` 1.0.1): 실패 12종·세션 수명·요청 처리·QueryClient 규칙·URL 검색·목록·폼·단건 상태·adapter 검사. 동작 코드와 사용 스킬을 같은 버전으로 준다. `vendor/`의 release tarball로 설치한다.
+- **[web-kit](https://github.com/taehyung-lab/web-kit)** (`@boosterlab/web-kit` 1.0.2): 실패 12종·세션 수명·요청 처리·QueryClient 규칙·URL 검색·목록·폼·단건 상태·adapter 검사. 동작 코드와 사용 스킬을 같은 버전으로 준다. `vendor/`의 release tarball로 설치한다.
 - **[agent-workflow-kit](https://github.com/taehyung-lab/agent-workflow-kit)**: 요구 → 조건 → 검사로 잇는 에이전트 작업 기준. `AGENTS.md`의 표시 영역, `CLAUDE.md`, `.agents/skills/wf-*`를 설치한다.
 
 ## 빠른 시작
@@ -97,13 +97,7 @@ vendor/                      web-kit release tarball
 
 ## 화면 추가하기
 
-`AGENTS.md`의 「화면 작업 읽는 순서」를 따른다.
-
-1. 단계 스킬(`wf-design`·`wf-implement`·`wf-verify`)로 필요한 단계를 고른다.
-2. 바뀌는 책임의 web-kit 역할 스킬을 읽는다: 목록 `web-kit-list`, 상세 `web-kit-record`, 폼 `web-kit-form`, 요청·세션 `web-kit-http`.
-3. `docs/product/`에서 그 화면의 제품 정책을 읽는다. 없으면 만들지 말고 묻는다.
-4. 제품 값(검색 기본값·URL key·문구·결과 코드 행)을 선언하고 `src/shared/ui` adapter로 화면을 연결한다. `features/products`의 `api/` · `model/` · `screens/` 모양을 따른다.
-5. 키트 adapter 검사와 실제 화면 관찰(URL·요청·focus)로 확인하고 `pnpm check`를 통과시킨다.
+필요한 단계는 `AGENTS.md`의 「필요한 단계만」, 역할 스킬·제품 정책·화면 연결·검사는 「화면 작업 근거」를 따른다. `src/features/products/`의 `api/` · `model/` · `screens/`가 화면 연결 예시다.
 
 ## 실제 API 연결하기
 

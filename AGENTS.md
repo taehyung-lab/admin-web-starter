@@ -66,12 +66,11 @@ lockfile에 없는 의존성 추가·lockfile 변경·원격 스크립트 실행
 - 실행·검사 명령·관찰 환경·시험 데이터: `package.json` scripts(`check` = typecheck + lint + test + build), CI `.github/workflows/check.yml`, 환경 변수 `.env.example`, mock 시험 데이터 `src/mocks/db.ts`. 실서버 관찰 환경: 미확인
 - 권한·보호 대상·작업 한도·질문 통로: git 원격 미확인. 그 밖은 미확인
 
-## 화면 작업 읽는 순서
+## 화면 작업 근거
 
-이 저장소에서 화면을 만들거나 바꿀 때는 이 순서로 읽고 진행한다.
+단계 선택은 위 「필요한 단계만」을 따른다. 화면 변경에 필요한 근거와 검사는 다음 위치에서 찾는다.
 
-1. 단계 스킬(`wf-design`·`wf-implement`·`wf-verify`) — 필요한 단계를 고른다.
-2. 바뀌는 책임의 web-kit 역할 스킬(`web-kit-list`·`web-kit-record`·`web-kit-form`·`web-kit-http`).
-3. `docs/product/`의 해당 화면 정책.
-4. 제품 값(검색 기본값·URL key·문구·결과 코드 행)을 선언하고 `src/shared/ui/` adapter로 화면을 연결한다.
-5. 키트 adapter 검사(`/testing`)와 실제 화면 관찰(URL·요청·focus)로 확인한다.
+- 공통 동작: 바뀌는 책임의 web-kit 역할 스킬(`web-kit-list`·`web-kit-record`·`web-kit-form`·`web-kit-http`).
+- 제품 정책: 현재 요청과 `docs/product/`의 해당 화면 정책. 이 근거로 확정할 수 없는 결정만 묻는다.
+- 화면 연결: `src/features/products/`의 제품 값 선언과 `src/shared/ui/` adapter.
+- 검증: 키트 adapter 검사(`/testing`)와 실제 화면의 URL·요청·focus 관찰. 브라우저에서만 확인할 보장은 `tests/e2e/`.

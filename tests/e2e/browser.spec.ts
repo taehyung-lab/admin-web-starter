@@ -1,5 +1,5 @@
 // 파일 책임: jsdom으로 볼 수 없는 키트 보장을 실제 브라우저에서 관찰한다 — 여러 탭의 세션, 진입 주소 정규화와 요청 순서, 결과가 있을 때의 재조회 실패.
-import { expect, test, type Page } from '@playwright/test';
+import { expect, test, type Page, type Request } from '@playwright/test';
 
 /** mock 계정으로 로그인하고 상품 목록이 보일 때까지 기다린다. */
 async function signIn(page: Page) {
@@ -8,19 +8,25 @@ async function signIn(page: Page) {
   await page.getByLabel('비밀번호').fill('password');
   await page.getByRole('button', { name: '로그인' }).click();
   await expect(page).toHaveURL(/\/products$/);
+  // URL 이동만 기다리면 다음 화면의 요청 기록에 로그인 직후 목록 요청이 섞일 수 있다.
+  await expect(page.getByRole('cell', { name: 'Mouse Pad' })).toBeVisible();
 }
 
-/** 이 페이지의 API 요청과 성공 응답을 일어난 순서대로 "→ METHOD /path?query" · "← 200 /path"로 기록한다. */
+/** 기록 시작 후 발생한 API 요청과 그 성공 응답만 순서대로 기록한다. */
 function recordApi(page: Page) {
   const events: string[] = [];
+  const requests = new Set<Request>();
   const line = (url: URL) => `${url.pathname}${decodeURIComponent(url.search)}`;
   page.on('request', (request) => {
     const url = new URL(request.url());
-    if (url.pathname.startsWith('/api/')) events.push(`→ ${request.method()} ${line(url)}`);
+    if (url.pathname.startsWith('/api/')) {
+      requests.add(request);
+      events.push(`→ ${request.method()} ${line(url)}`);
+    }
   });
   page.on('response', (response) => {
     const url = new URL(response.url());
-    if (url.pathname.startsWith('/api/') && response.status() === 200) events.push(`← 200 ${url.pathname}`);
+    if (requests.has(response.request()) && response.status() === 200) events.push(`← 200 ${url.pathname}`);
   });
   return events;
 }
@@ -55,7 +61,6 @@ test('an entry URL with unknown values is replaced and the list waits for the op
 
 test('a failed background refresh keeps the rows and offers a retry', async ({ page }) => {
   await signIn(page);
-  await expect(page.getByRole('cell', { name: 'Mouse Pad' })).toBeVisible();
   // mock 서버(이 페이지의 msw)를 내려 같은 조건 재조회를 실패시킨다.
   await page.evaluate(async () => {
     // 개발 서버가 앱과 같은 모듈 인스턴스로 내주는 경로다(브라우저 안에서만 존재).
