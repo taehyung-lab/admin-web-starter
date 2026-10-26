@@ -80,6 +80,7 @@ async function fillNewProduct(page: Page) {
   await page.goto('/products/new');
   await page.getByLabel('상품명').fill('Fresh Item');
   await page.getByLabel('상품 코드').fill('FRESH-1');
+  await page.getByLabel(/옵션명 1/).fill('Large');
   await expect(page.getByRole('option', { name: 'Stationery' })).toBeAttached();
   await page.getByLabel('분류').selectOption({ label: 'Stationery' });
 }

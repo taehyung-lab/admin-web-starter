@@ -4,11 +4,12 @@ import { useFieldMessage } from '@/shared/lib/form-messages';
 import { Button } from '@/shared/ui/Button';
 import { Field, SelectInput, TextArea, TextInput } from '@/shared/ui/Field';
 import { isRequestFailure } from '@boosterlab/web-kit/failure';
-import type { useSaveForm } from '@boosterlab/web-kit/form';
+import { FormArrayField, type useSaveForm } from '@boosterlab/web-kit/form';
 import { useQuery } from '@tanstack/react-query';
+import type { KeyboardEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { categoryOptionsQuery } from '../api/categories';
-import type { ProductFormOutput, ProductFormValues } from '../model/form';
+import { OPTION_LIMITS, type ProductFormOutput, type ProductFormValues } from '../model/form';
 import { PRODUCT_STATUSES, type ProductStatus } from '../model/product';
 
 /** 폼 본문이 읽는 부분만. 등록·수정은 저장 결과 모양(TResult)이 달라도 같은 본문을 쓴다. */
@@ -17,7 +18,8 @@ export type ProductSaveForm = Pick<
   'form' | 'fieldId' | 'failure' | 'unattachedFieldErrors' | 'isSaving' | 'submit'
 >;
 
-type TextFieldName = Exclude<keyof ProductFormValues, 'status' | 'categoryId' | 'description'>;
+type TextFieldName = Exclude<keyof ProductFormValues, 'status' | 'categoryId' | 'description' | 'options'>;
+type OptionFieldName = `options[${number}].name` | `options[${number}].extraPrice`;
 
 /** 폼 본문. submitLabel은 등록·수정이 다르다. */
 export function ProductForm({ saveForm, submitLabel, onCancel }: { readonly saveForm: ProductSaveForm; readonly submitLabel: string; readonly onCancel: () => void }) {
@@ -38,6 +40,27 @@ export function ProductForm({ saveForm, submitLabel, onCancel }: { readonly save
               value={field.state.value}
               onChange={(event) => field.handleChange(event.target.value)}
               onBlur={field.handleBlur}
+            />
+          )}
+        </Field>
+      )}
+    </form.Field>
+  );
+
+  /** 옵션 한 줄의 입력 칸. Enter는 줄 추가 버튼과 같은 일을 한다. */
+  const optionField = (name: OptionFieldName, label: string, props: { readonly inputMode?: 'numeric'; readonly onKeyDown: (event: KeyboardEvent) => void }) => (
+    <form.Field name={name}>
+      {(field) => (
+        <Field id={fieldId(name)} label={label} required message={message(field.state.meta.errors)}>
+          {(control) => (
+            <TextInput
+              {...control}
+              name={name}
+              inputMode={props.inputMode}
+              value={field.state.value}
+              onChange={(event) => field.handleChange(event.target.value)}
+              onBlur={field.handleBlur}
+              onKeyDown={props.onKeyDown}
             />
           )}
         </Field>
@@ -114,6 +137,34 @@ export function ProductForm({ saveForm, submitLabel, onCancel }: { readonly save
         {textField('price', { inputMode: 'numeric' })}
         {textField('stock', { inputMode: 'numeric' })}
       </div>
+      <FormArrayField form={form} name="options" minItems={OPTION_LIMITS.min} maxItems={OPTION_LIMITS.max}>
+        {(rows) => {
+          const addOption = () => rows.append({ name: '', extraPrice: '0' });
+          return (
+            <fieldset className="flex flex-col gap-3">
+              <legend className="mb-1 text-sm font-medium text-slate-800">{t('products.fields.options')}</legend>
+              {rows.items.map((_, index) => (
+                <div key={index} className="grid items-start gap-3 md:grid-cols-[1fr_10rem_auto]">
+                  {optionField(`options[${index}].name`, `${t('products.fields.optionName')} ${index + 1}`, { onKeyDown: rows.enterAdds(addOption) })}
+                  {optionField(`options[${index}].extraPrice`, `${t('products.fields.optionExtraPrice')} ${index + 1}`, {
+                    inputMode: 'numeric',
+                    onKeyDown: rows.enterAdds(addOption),
+                  })}
+                  {rows.canRemove ? (
+                    <Button variant="ghost" className="mt-6" onClick={() => rows.remove(index)}>
+                      {t('products.form.removeOption', { index: index + 1 })}
+                    </Button>
+                  ) : null}
+                </div>
+              ))}
+              <Button variant="secondary" className="self-start" disabled={!rows.canAdd} onClick={addOption}>
+                {t('products.form.addOption')}
+              </Button>
+              {message(rows.errors) ? <p role="alert" className="text-sm text-rose-700">{message(rows.errors)}</p> : null}
+            </fieldset>
+          );
+        }}
+      </FormArrayField>
       <form.Field name="description">
         {(field) => (
           <Field id={fieldId('description')} label={t('products.fields.description')} message={message(field.state.meta.errors)}>

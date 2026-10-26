@@ -89,7 +89,7 @@ export const handlers = [
         const order = left < right ? -1 : left > right ? 1 : 0;
         return direction === 'asc' ? order : -order;
       });
-    const content = rows.slice(page * size, page * size + size).map(({ stock: _stock, description: _description, updatedAt: _updatedAt, ...summary }) => summary);
+    const content = rows.slice(page * size, page * size + size).map(({ stock: _stock, description: _description, options: _options, updatedAt: _updatedAt, ...summary }) => summary);
     return ok({ content, totalElements: rows.length });
   }),
 

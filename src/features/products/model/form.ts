@@ -8,6 +8,14 @@ import { PRODUCT_STATUSES, type Product, type ProductStatus } from './product';
 const m = (key: string) => formMessages.encode(`products.form.errors.${key}`);
 const amount = z.string().trim().regex(/^\d{1,9}$/, m('amount')).transform(Number);
 
+/** 옵션은 1~5줄이다. 서버 명세의 minItems·maxItems를 옮긴 것이다. */
+export const OPTION_LIMITS = { min: 1, max: 5 } as const;
+
+const option = z.object({
+  name: z.string().trim().min(1, m('optionNameRequired')).max(30, m('optionNameTooLong')),
+  extraPrice: amount,
+});
+
 /** 입력 값(문자열) → 저장 값(숫자 변환 포함). 서버 명세의 제약을 옮긴 것이다. */
 export const productFormSchema = z.object({
   name: z.string().trim().min(1, m('nameRequired')).max(100, m('nameTooLong')),
@@ -16,6 +24,7 @@ export const productFormSchema = z.object({
   categoryId: z.string().min(1, m('categoryRequired')),
   price: amount,
   stock: amount,
+  options: z.array(option).min(OPTION_LIMITS.min, m('optionsCount')).max(OPTION_LIMITS.max, m('optionsCount')),
   description: z.string().max(500, m('descriptionTooLong')),
 });
 
@@ -29,6 +38,7 @@ export const emptyProductForm: ProductFormValues = {
   categoryId: '',
   price: '0',
   stock: '0',
+  options: [{ name: '', extraPrice: '0' }],
   description: '',
 };
 
@@ -41,6 +51,7 @@ export function toProductFormValues(product: Product): ProductFormValues {
     categoryId: product.categoryId,
     price: String(product.price),
     stock: String(product.stock),
+    options: product.options.map((option) => ({ name: option.name, extraPrice: String(option.extraPrice) })),
     description: product.description,
   };
 }

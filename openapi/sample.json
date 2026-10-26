@@ -758,7 +758,8 @@
           "price",
           "stock",
           "createdAt",
-          "updatedAt"
+          "updatedAt",
+          "options"
         ],
         "properties": {
           "productId": {
@@ -793,6 +794,14 @@
           },
           "categoryId": {
             "type": "string"
+          },
+          "options": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 5,
+            "items": {
+              "$ref": "#/components/schemas/ProductOption"
+            }
           }
         }
       },
@@ -819,7 +828,8 @@
           "status",
           "categoryId",
           "price",
-          "stock"
+          "stock",
+          "options"
         ],
         "properties": {
           "name": {
@@ -850,6 +860,14 @@
           },
           "categoryId": {
             "type": "string"
+          },
+          "options": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 5,
+            "items": {
+              "$ref": "#/components/schemas/ProductOption"
+            }
           }
         }
       },
@@ -924,6 +942,25 @@
             "items": {
               "$ref": "#/components/schemas/Category"
             }
+          }
+        }
+      },
+      "ProductOption": {
+        "type": "object",
+        "required": [
+          "name",
+          "extraPrice"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 30
+          },
+          "extraPrice": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "원 단위 추가금액"
           }
         }
       }

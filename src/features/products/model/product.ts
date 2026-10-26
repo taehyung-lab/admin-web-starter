@@ -11,6 +11,12 @@ export interface Category {
   readonly name: string;
 }
 
+/** 상품 옵션 한 줄. 추가금액은 원 단위 정수다. */
+export interface ProductOption {
+  readonly name: string;
+  readonly extraPrice: number;
+}
+
 export interface ProductSummary {
   readonly id: string;
   readonly name: string;
@@ -23,6 +29,7 @@ export interface ProductSummary {
 
 export interface Product extends ProductSummary {
   readonly stock: number;
+  readonly options: readonly ProductOption[];
   /** 서버의 null은 빈 문자열로 받는다. */
   readonly description: string;
   readonly updatedAt: string;
