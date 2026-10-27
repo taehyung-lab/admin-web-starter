@@ -6,10 +6,8 @@ import { fileURLToPath, URL } from 'node:url';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-  plugins: [
-    tanstackRouter({ target: 'react', autoCodeSplitting: true, routeFileIgnorePattern: '\\.test\\.' }),
-    react(),
-    tailwindcss(),
-  ],
+  plugins: [tanstackRouter({ target: 'react', autoCodeSplitting: true, routeFileIgnorePattern: '\\.test\\.' }), react(), tailwindcss()],
+  // 지연 route에서 사용하는 TSX subpath도 시작 전에 prebundle해 CJS 의존성을 ESM으로 연결한다.
+  optimizeDeps: { extensions: ['.tsx'] },
   resolve: { alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) } },
 });

@@ -13,12 +13,10 @@ export const Route = createFileRoute('/_app/products/$productId/edit')({
 function ProductEditRoute() {
   const { productId } = Route.useParams();
   const navigate = Route.useNavigate();
-  const toDetail = () => void navigate({ to: '/products/$productId', params: { productId } });
   return (
     <ProductEditScreen
       productId={productId}
-      onSaved={toDetail}
-      onCancel={toDetail}
+      destination={{ kind: 'navigate', destination: { to: '/products/$productId', params: { productId } } }}
       onBack={() => void navigate({ to: '/products' })}
     />
   );

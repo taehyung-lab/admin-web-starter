@@ -3,7 +3,9 @@
 import { createResultCodeTable, isRequestFailure, RequestFailure } from '@boosterlab/web-kit';
 import { createHttp, type Http, type Unwrapped } from '@boosterlab/web-kit/http';
 import { createQueryClient } from '@boosterlab/web-kit/query';
-import { createSession, type Credentials, type SessionStore, type StoredSession } from '@boosterlab/web-kit/session';
+import { createSession, type Credentials } from '@boosterlab/web-kit/session';
+import { createBrowserSessionStore } from '@boosterlab/web-kit/session/browser';
+import { z } from 'zod';
 import type { AxiosRequestConfig } from 'axios';
 import { env } from './env';
 import { i18n } from './i18n';
@@ -23,48 +25,12 @@ export const resultCodes = createResultCodeTable([
 /** localStorage에 두는 저장 key. 실제 값은 로그·응답에 남기지 않는다. */
 const STORAGE_KEY = 'app.session';
 
-function parseStored(raw: string | null): StoredSession<Credentials> | null {
-  if (raw === null) return null;
-  try {
-    const value: unknown = JSON.parse(raw);
-    if (
-      typeof value === 'object' && value !== null &&
-      'sessionId' in value && typeof value.sessionId === 'string' &&
-      'credentials' in value && typeof value.credentials === 'object' && value.credentials !== null &&
-      'accessToken' in value.credentials && typeof value.credentials.accessToken === 'string'
-    )
-      return { sessionId: value.sessionId, credentials: { accessToken: value.credentials.accessToken } };
-  } catch {
-    // 형식이 깨진 저장값은 세션이 없는 것으로 본다.
-  }
-  return null;
-}
-
-/** localStorage + storage 이벤트. 값과 변경 사실만 알리고, 같은 세션의 회전인지 교체·종료인지는 web-kit 세션이 판정한다. */
-const store: SessionStore<Credentials> = {
-  read: () => {
-    try {
-      return parseStored(localStorage.getItem(STORAGE_KEY));
-    } catch {
-      return null;
-    }
-  },
-  write: (value) => {
-    try {
-      if (value === null) localStorage.removeItem(STORAGE_KEY);
-      else localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
-    } catch {
-      // 저장소를 쓸 수 없는 환경(사생활 모드 등)에서는 이 탭의 메모리 세션만 남는다.
-    }
-  },
-  subscribe: (listener) => {
-    const onStorage = (event: StorageEvent) => {
-      if (event.key === null || event.key === STORAGE_KEY) listener(parseStored(event.newValue));
-    };
-    window.addEventListener('storage', onStorage);
-    return () => window.removeEventListener('storage', onStorage);
-  },
-};
+/** 예시 제품은 저장소 읽기 불가 때 현재 탭의 로그인 상태를 유지한다. */
+const store = createBrowserSessionStore({
+  key: STORAGE_KEY,
+  credentials: z.object({ accessToken: z.string() }),
+  unreadable: 'memory',
+});
 
 /** 세션 밖 요청: 로그인 전·재발급·로그아웃. 토큰이 자동으로 실리지 않고, 실패가 세션을 건드리지 않는다. */
 const PUBLIC_PATHS = ['/api/auth/sign-in', '/api/auth/reissue', '/api/auth/sign-out'];

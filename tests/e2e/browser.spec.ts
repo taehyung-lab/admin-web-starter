@@ -66,7 +66,12 @@ test('a failed background refresh keeps the rows and offers a retry', async ({ p
     // 개발 서버가 앱과 같은 모듈 인스턴스로 내주는 경로다(브라우저 안에서만 존재).
     const dbModule = '/src/mocks/db.ts';
     const { mockDb } = (await import(/* @vite-ignore */ dbModule)) as { mockDb: object };
-    Object.defineProperty(mockDb, 'products', { get: () => { throw new Error('mock server down'); }, configurable: true });
+    Object.defineProperty(mockDb, 'products', {
+      get: () => {
+        throw new Error('mock server down');
+      },
+      configurable: true,
+    });
   });
   await page.getByRole('button', { name: '검색' }).click();
 
@@ -120,4 +125,31 @@ test('saving an edit moves to the detail without an unsaved-changes question', a
   await page.getByRole('alertdialog').getByRole('button', { name: '저장', exact: true }).click();
   await expect(page).toHaveURL(/\/products\/[^/]+$/);
   await expect(page.getByRole('alertdialog')).toHaveCount(0);
+});
+
+// 기본 확인 UI의 키보드 focus와 필수 표시를 실제 브라우저에서 확인한다.
+test('save confirmation traps focus and Escape returns to the save button', async ({ page }, testInfo) => {
+  await signIn(page);
+  await page.getByRole('cell', { name: 'Mouse Pad' }).click();
+  await expect(page).toHaveURL(/\/products\/[^/]+$/);
+  await page.goto(`${new URL(page.url()).pathname}/edit`);
+  await expect(page.getByRole('option', { name: 'Kitchen' })).toBeAttached();
+  await expect(page.getByLabel('분류')).toHaveValue('c-kitchen');
+  const name = page.getByLabel('상품명');
+  await expect(name).toHaveAttribute('aria-required', 'true');
+  await name.fill('Keyboard edit');
+  const save = page.getByRole('button', { name: '저장', exact: true });
+  await save.click();
+  const dialog = page.getByRole('alertdialog');
+  await expect(dialog).toBeVisible();
+  for (let i = 0; i < 5; i++) {
+    await page.keyboard.press('Tab');
+    expect(await dialog.evaluate((node) => node.contains(document.activeElement))).toBe(true);
+  }
+  await page.screenshot({ path: testInfo.outputPath('save-dialog.png'), fullPage: true });
+  await page.keyboard.press('Escape');
+  await expect(dialog).toHaveCount(0);
+  await expect(save).toBeFocused();
+  await expect(name).toHaveValue('Keyboard edit');
+  await page.screenshot({ path: testInfo.outputPath('edit-form.png'), fullPage: true });
 });
