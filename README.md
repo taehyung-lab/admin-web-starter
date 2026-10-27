@@ -1,11 +1,11 @@
 # admin-web-starter
 
-> The default starting point for an admin web app on web-kit 1.0 and agent-workflow-kit.
+> The default starting point for an admin web app on web-kit 2.0 candidate and agent-workflow-kit.
 > Clone it, run `pnpm install && pnpm dev:mock`, then replace the sample spec and screens with your own.
 
 **이 스택으로 프론트를 시작하면 이 저장소로 시작한다.**
 
-관리자 웹을 새로 만들 때 쓰는 기본 저장소다. 키트 연결(세션·요청·QueryClient), 프로젝트 UI adapter, 예시 기능 하나(상품 목록·상세·등록·수정·로그인), mock API, 화면 테스트, CI까지 갖춰 두었다. 예시 기능의 값(검색 기본값·문구·업무 규칙)은 스타터가 정한 예시이며 제품 결정이 아니다.
+관리자 웹을 새로 만들 때 쓰는 기본 저장소다. 키트 연결(세션·요청·QueryClient), 키트 기본 UI, 예시 기능 하나(상품 목록·상세·등록·수정·로그인), mock API, 화면 테스트, CI까지 갖춰 두었다. 예시 기능의 값(검색 기본값·문구·업무 규칙)은 스타터가 정한 예시이며 제품 결정이 아니다.
 
 ## 스택
 
@@ -13,7 +13,7 @@
 |---|---|
 | 화면 | React 19.2, Base UI 1.7 + Tailwind CSS 4 |
 | 라우팅 | TanStack Router 1.170 (파일 route, `@tanstack/router-plugin`) |
-| 데이터·폼·표 | TanStack Query 5, TanStack Form 1, TanStack Table 9 |
+| 데이터·폼·표 | TanStack Query 5, TanStack Form 1 |
 | 계약 | zod 4, axios 1.20, orval 8 (OpenAPI → endpoint 함수) |
 | 문구 | i18next 26 + react-i18next 17 (ko/en) |
 | 검사 | TypeScript 5.9, ESLint 10(typescript-eslint, react-hooks), Vitest 4 + Testing Library + jsdom, msw 2 |
@@ -64,7 +64,7 @@ src/
       screens/               목록·상세·등록·수정 화면과 화면 테스트
     auth/                    로그인 화면·요청
   shared/
-    ui/                      프로젝트 UI adapter(Base UI + Tailwind, 도메인 모름)
+    ui/                      설치한 키트 UI의 소비 검사
     lib/                     실패 문구 키·폼 문구 해소
   routes/                    파일 route(validateSearch·beforeLoad·loader 미리 받기)
   mocks/                     msw handler·메모리 DB(테스트와 dev:mock 공용)
@@ -80,13 +80,14 @@ vendor/                      web-kit release tarball
 
 | 위치 | 보여 주는 키트 사용 |
 |---|---|
-| `app/web-kit.ts` | localStorage `SessionStore` + storage 이벤트, 공개 요청으로 재발급, `isPublic`·`prepare`(Accept-Language)·axios 기본값, QueryClient retry·staleTime·`notify` 예시, 예시 결과 코드 행 |
+| `app/web-kit.ts` | `createBrowserSessionStore`(key·schema·읽기 불가 정책 선언), 공개 요청으로 재발급, `isPublic`·`prepare`(Accept-Language)·axios 기본값, QueryClient retry·staleTime·`notify` 예시, 예시 결과 코드 행 |
 | `app/auth.tsx` | 캡처한 토큰으로 로그아웃, `ended`의 `by`(local·other-tab·server)별 이동 |
-| 상품 목록 | `defineSearch`(쉼표 목록 `encode`, 기간 묶음 `valid`, `view` key, 고정 목록은 `z.enum`·서버 선택지(분류)는 `check` — 없는 값은 그 필드만 기본값), route `validateSearch` + `beforeLoad`, `useList` 선택·일괄 작업(`/dialog` 확인)·결과가 있는 재조회 실패의 `refresh()`, `/api` 반복 키 직렬화 |
-| 상품 상세 | `useRecord(options, id)`, loader는 미리 받기만, `RecordStateBoundary` |
-| 등록·수정 | `useSaveForm`(수정은 확인창), 서버 필드 오류 `fieldError`, `unattachedFieldErrors` 한 줄, `onSaved(result)`로 새 id 상세 이동, 이탈 보호(`LeaveGuard when={isDirty}` — 저장이 끝나면 dirty가 아니라 우회 없이 이동), 옵션 줄 입력 `FormArrayField`(Enter = 줄 추가 버튼, 한 줄뿐이면 삭제 없음, 5줄에서 추가 막힘) |
-| 로그인 | 공개 요청, `onSaved(result)`로 받은 토큰으로 세션 시작, 자격증명 401 → 입력 아래 한 줄 |
-| `shared/ui` | Field(FieldFrame + `formFieldControlId`), ConfirmDialog(stage, 저장 중 닫기 차단), Table(TanStack Table), FilterMessage(FilterError), RecordStateBoundary, RetryRegion |
+| 상품 목록 | `defineSearch`(쉼표 목록 `encode`, 기간 묶음 `valid`, `view` key, 고정 목록은 `z.enum`·서버 선택지(분류)는 `check` — 없는 값은 그 필드만 기본값), route `validateSearch` + `beforeLoad`, `useList` + `ListView` 필터·표·페이지 이동·일괄 확인, `/api` 반복 키 직렬화 |
+| 상품 상세 | `useRecord(options, id)`, loader는 미리 받기만, `RecordView` |
+| 등록·수정 | `SaveForm` + typed fields로 필수·오류·배열 입력을 선언. 수정은 저장 확인, 완료 후 이동은 `FormIntent`. 루트의 `FormNavigation` 한 곳에서 이탈을 보호 |
+| 로그인 | `SaveForm protect={false}`로 제품 예외를 명시. 공개 요청·토큰으로 세션 시작·자격증명 거절 문구는 제품이 연결 |
+| `shared/ui/adapters.test.tsx` | 설치한 Field·ConfirmDialog·RetryRegion을 공개 계약 검사로 확인 |
+
 
 실패 문구는 실패 종류·`messageKey`로만 고른다. 서버 `resultMessage`는 화면에 보이지 않는다.
 
@@ -105,12 +106,14 @@ vendor/                      web-kit release tarball
 
 1. `openapi/sample.json`을 실제 서버 명세로 바꾸고(파일 이름을 바꾸면 `orval.config.ts`의 `input`도) `pnpm api:generate`를 돌린다. 생성물은 commit한다.
 2. `src/app/web-kit.ts`의 결과 코드 표를 **서버 enum에 있는 행으로만** 다시 적는다. 예시 두 행(세션 종료 4012, 대상 없음 4040)은 지운다. 세션 종료 행은 서버 계약이 확정된 것만 둔다(web-kit 결정 기록 0001의 E1–E3).
-3. `PUBLIC_PATHS`·`REISSUE_PATH`·재발급 본문, `SessionStore` 저장 위치를 서버 인증 계약에 맞춘다.
+3. `PUBLIC_PATHS`·`REISSUE_PATH`·재발급 본문, 브라우저 저장 key·자격증명 schema·읽기 불가 정책를 서버 인증 계약에 맞춘다.
 4. `.env.example`을 `.env.local`로 복사해 `VITE_API_BASE_URL`·`VITE_API_TIMEOUT_MS`를 채운다. 비밀값은 commit하지 않는다.
 5. 예시 기능(`features/products`, `routes/_app/products`, `mocks`의 상품 handler)을 자기 도메인으로 바꾸거나 지운다.
 
 mock 통과나 HTTP 200만으로 서버 계약을 확인했다고 보지 않는다. 실제 서버로 401·재발급·필드 오류 모양을 따로 관찰한다.
 
 ## 키트 갱신
+
+현재 작업 브랜치의 2.0.0 tarball은 로컬 소비 검사용 후보이며 아직 release가 아니다. `selection.run`의 결과는 실제 성공 ID인 `{ completedIds }`로 반환한다. 예시 API가 개수만 주는 부분 성공에서는 ID를 추측하지 않고 선택을 보존한다.
 
 새 버전을 받는 방법은 각 키트 README의 업데이트·업그레이드를 따른다. 받은 뒤 이 저장소의 `pnpm check`와 `pnpm test:e2e`를 통과시킨다.

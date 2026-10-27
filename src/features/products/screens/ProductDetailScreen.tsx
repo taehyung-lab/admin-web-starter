@@ -1,7 +1,7 @@
 // 파일 책임: 상품 상세 화면. 단건 상태 판정은 web-kit useRecord 한 곳이 하고, 여기서는 상태별 표현과 dt/dd 목록을 그린다.
-import { Button } from '@/shared/ui/Button';
-import { RecordStateBoundary } from '@/shared/ui/RecordStateBoundary';
-import { DetailField } from '@boosterlab/web-kit/detail/ui';
+import { failureCopyKey } from '@/shared/lib/failure-copy';
+import { Button } from '@boosterlab/web-kit/form/ui';
+import { DetailField, RecordView } from '@boosterlab/web-kit/detail/ui';
 import { useRecord } from '@boosterlab/web-kit/record';
 import { useQuery } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
@@ -31,8 +31,10 @@ export function ProductDetailScreen({
       <Button variant="ghost" className="self-start" onClick={onBack}>
         ‹ {t('products.backToList')}
       </Button>
-      <RecordStateBoundary
+      <RecordView
+        messages={{ loading: t('common.loading'), retry: t('common.retry'), refreshFailed: t('common.refreshFailed') }}
         state={state}
+        renderFailure={(failure) => t(failureCopyKey(failure))}
         missingAction={() => (
           <Button variant="secondary" onClick={onBack}>
             {t('products.backToList')}
@@ -40,7 +42,7 @@ export function ProductDetailScreen({
         )}
       >
         {(product) => <ProductDetail product={product} onEdit={onEdit} />}
-      </RecordStateBoundary>
+      </RecordView>
     </div>
   );
 }
@@ -83,7 +85,10 @@ function ProductDetail({ product, onEdit }: { readonly product: Product; readonl
             ))}
           </ul>,
         )}
-        {item(t('products.fields.description'), product.description === '' ? t('common.empty') : <span className="whitespace-pre-wrap">{product.description}</span>)}
+        {item(
+          t('products.fields.description'),
+          product.description === '' ? t('common.empty') : <span className="whitespace-pre-wrap">{product.description}</span>,
+        )}
         {item(t('products.fields.createdAt'), formatDate(product.createdAt, i18n.language))}
         {item(t('products.fields.updatedAt'), formatDate(product.updatedAt, i18n.language))}
       </dl>

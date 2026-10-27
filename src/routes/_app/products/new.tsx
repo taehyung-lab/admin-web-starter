@@ -7,11 +7,10 @@ export const Route = createFileRoute('/_app/products/new')({
 });
 
 function ProductCreateRoute() {
-  const navigate = Route.useNavigate();
   return (
     <ProductCreateScreen
-      onCreated={(productId) => void navigate({ to: '/products/$productId', params: { productId } })}
-      onCancel={() => void navigate({ to: '/products' })}
+      createdDestination={(productId) => ({ kind: 'navigate', destination: { to: '/products/$productId', params: { productId } } })}
+      cancel={{ kind: 'navigate', destination: { to: '/products' } }}
     />
   );
 }

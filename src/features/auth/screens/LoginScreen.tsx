@@ -1,10 +1,8 @@
 // 파일 책임: 로그인 화면. 자격증명 거절(401)은 입력 아래 한 줄로, 그 밖의 실패는 실패 종류 문구로 보인다. 세션 시작은 onSignedIn이 맡는다.
 import { failureCopyKey } from '@/shared/lib/failure-copy';
 import { formMessages, useFieldMessage } from '@/shared/lib/form-messages';
-import { Button } from '@/shared/ui/Button';
-import { Field, TextInput } from '@/shared/ui/Field';
 import { isRequestFailure } from '@boosterlab/web-kit/failure';
-import { useSaveForm } from '@boosterlab/web-kit/form';
+import { SaveForm } from '@boosterlab/web-kit/form/ui';
 import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import { signIn } from '../api/auth';
@@ -26,15 +24,6 @@ export function LoginScreen({
 }) {
   const { t } = useTranslation();
   const message = useFieldMessage();
-  const saveForm = useSaveForm({
-    schema,
-    source: { id: 'login', values: { loginId: '', password: '' } },
-    // 저장 결과(access 토큰)는 onSaved가 그대로 받는다.
-    save: async (values) => ({ accessToken: await signIn(values.loginId, values.password) }),
-    onSaved: (result) => onSignedIn(result.accessToken),
-  });
-  const { form, fieldId, failure } = saveForm;
-  const rejected = isRequestFailure(failure) && failure.kind === 'unauthorized';
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-100 px-4">
@@ -45,56 +34,28 @@ export function LoginScreen({
             {notice}
           </p>
         )}
-        <form
-          noValidate
-          className="mt-6 flex flex-col gap-4"
-          onSubmit={(event) => {
-            event.preventDefault();
-            void saveForm.submit();
+        <SaveForm
+          schema={schema}
+          source={{ id: 'login', values: { loginId: '', password: '' } }}
+          protect={false}
+          formatError={message}
+          save={async (values) => ({ accessToken: await signIn(values.loginId, values.password) })}
+          completion={(result) => {
+            onSignedIn(result.accessToken);
           }}
+          renderFailure={(failure) =>
+            isRequestFailure(failure) && failure.kind === 'unauthorized' ? t('auth.credentialRejected') : t(failureCopyKey(failure))
+          }
         >
-          <form.Field name="loginId">
-            {(field) => (
-              <Field id={fieldId('loginId')} label={t('auth.loginId')} required message={message(field.state.meta.errors)}>
-                {(control) => (
-                  <TextInput
-                    {...control}
-                    autoFocus
-                    autoComplete="username"
-                    value={field.state.value}
-                    onChange={(event) => field.handleChange(event.target.value)}
-                    onBlur={field.handleBlur}
-                  />
-                )}
-              </Field>
-            )}
-          </form.Field>
-          <form.Field name="password">
-            {(field) => (
-              <Field id={fieldId('password')} label={t('auth.password')} required message={message(field.state.meta.errors)}>
-                {(control) => (
-                  <TextInput
-                    {...control}
-                    type="password"
-                    autoComplete="current-password"
-                    value={field.state.value}
-                    onChange={(event) => field.handleChange(event.target.value)}
-                    onBlur={field.handleBlur}
-                  />
-                )}
-              </Field>
-            )}
-          </form.Field>
-          {failure === undefined ? null : (
-            <p role="alert" className="text-sm font-medium text-rose-600">
-              {rejected ? t('auth.credentialRejected') : t(failureCopyKey(failure))}
-            </p>
+          {(field) => (
+            <>
+              <field.Text name="loginId" label={t('auth.loginId')} required autoFocus autoComplete="username" />
+              <field.Text name="password" label={t('auth.password')} required type="password" autoComplete="current-password" />
+              <field.Actions submitLabel={t('auth.submit')} />
+              {showMockHint && <p>{t('auth.mockHint')}</p>}
+            </>
           )}
-          <Button variant="primary" type="submit" disabled={saveForm.isSaving} className="mt-2 h-10">
-            {t('auth.submit')}
-          </Button>
-          {showMockHint ? <p className="text-center text-xs text-slate-400">{t('auth.mockHint')}</p> : null}
-        </form>
+        </SaveForm>
       </div>
     </main>
   );

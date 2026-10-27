@@ -2,7 +2,7 @@
 import { useAuth } from '@/app/auth';
 import { changeLanguage, LANGUAGES } from '@/app/i18n';
 import { session } from '@/app/web-kit';
-import { Button } from '@/shared/ui/Button';
+import { Button } from '@boosterlab/web-kit/form/ui';
 import { createFileRoute, Link, Outlet, redirect } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 
