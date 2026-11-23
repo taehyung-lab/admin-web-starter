@@ -142,6 +142,8 @@ test('save confirmation traps focus and Escape returns to the save button', asyn
   await save.click();
   const dialog = page.getByRole('alertdialog');
   await expect(dialog).toBeVisible();
+  // Base UI schedules initial focus after the popup becomes visible.
+  await expect.poll(() => dialog.evaluate((node) => node.contains(document.activeElement))).toBe(true);
   for (let i = 0; i < 5; i++) {
     await page.keyboard.press('Tab');
     expect(await dialog.evaluate((node) => node.contains(document.activeElement))).toBe(true);
